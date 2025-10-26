@@ -61,7 +61,6 @@ namespace cg::renderer
 		if (in_depth_buffer) {
 			depth_buffer = in_depth_buffer;
 		}
-		// TODO Lab: 1.06 Adjust `set_render_target`, and `clear_render_target` methods of `cg::renderer::rasterizer` class to consume a depth buffer
 	}
 
 	template<typename VB, typename RT>
@@ -77,8 +76,8 @@ namespace cg::renderer
 	{
 		for (auto i = 0; i < render_target->count(); i++) {
 			render_target->item(i) = in_clear_value;
+			depth_buffer->item(i) = in_depth;
 		}
-		// TODO Lab: 1.06 Adjust `set_render_target`, and `clear_render_target` methods of `cg::renderer::rasterizer` class to consume a depth buffer
 	}
 
 	template<typename VB, typename RT>
@@ -112,12 +111,16 @@ namespace cg::renderer
 				float4 coords(vertex.v.x, vertex.v.y, vertex.v.z, 1.f);
 				auto processed = vertex_shader(coords, vertex);
 
+				using namespace linalg::ostream_overloads;
+				std::cout << processed.first << "\n";
+
 				vertex.v.x = processed.first.x / processed.first.w;
 				vertex.v.y = processed.first.y / processed.first.w;
 				vertex.v.z = processed.first.z / processed.first.w;
 
 				vertex.v.x = (vertex.v.x + 1.f) * width / 2.f;
 				vertex.v.y = (-vertex.v.y + 1.f) * height / 2.f;
+
 			}
 
 			int2 vertex_a(static_cast<int>(vertices[0].v.x),
@@ -136,19 +139,30 @@ namespace cg::renderer
 			int2 min_aabb = clamp(min_vertex, min_border, max_border);
 			int2 max_aabb = clamp(max_vertex, min_border, max_border);
 
+			float edge = static_cast<float>(edge_function(vertex_a, vertex_b, vertex_c));
+
 			for (int x = min_aabb.x; x <= max_aabb.x; x++)
 			{
 				for (int y = min_aabb.y; y <= max_aabb.y; y++)
 				{
 					int2 point(x, y);
-					int edge0 = edge_function(vertex_a, vertex_b, point);
-					int edge1 = edge_function(vertex_b, vertex_c, point);
-					int edge2 = edge_function(vertex_c, vertex_a, point);
-					if (edge0 >= 0 && edge1 >= 0 && edge2 >= 0)
+					float u = static_cast<float>(edge_function(vertex_b, vertex_c, point)) / 
+					edge;
+					float v = static_cast<float>(edge_function(vertex_c, vertex_a, point)) /
+					edge;
+					float w = static_cast<float>(edge_function(vertex_a, vertex_b, point)) / 
+					edge;
+					if (u >= 0.f && v >= 0.f && w >= 0.f)
 					{
-						float depth = 1.f;
-						auto result = pixel_shader(vertices[0], depth);
-						render_target->item(x, y) = RT::from_color(result);
+						float depth = u * vertices[0].v.z +
+									  v * vertices[1].v.z + 
+									  w * vertices[2].v.z;
+						if (depth_test(depth, x, y))
+						{
+							auto result = pixel_shader(vertices[0], depth);
+							render_target->item(x, y) = RT::from_color(result);
+							depth_buffer->item(x, y) = depth;
+						}
 					}
 				}
 			}
