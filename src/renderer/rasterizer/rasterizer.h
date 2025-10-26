@@ -99,6 +99,7 @@ namespace cg::renderer
 	inline void rasterizer<VB, RT>::draw(size_t num_vertexes, size_t vertex_offset)
 	{
 		size_t vertex_id = vertex_offset;
+
 		while(vertex_id < vertex_offset + num_vertexes)
 		{
 			std::vector<VB> vertices(3);
@@ -118,8 +119,41 @@ namespace cg::renderer
 				vertex.v.x = (vertex.v.x + 1.f) * width / 2.f;
 				vertex.v.y = (-vertex.v.y + 1.f) * height / 2.f;
 			}
+
+			int2 vertex_a(static_cast<int>(vertices[0].v.x),
+				static_cast<int>(vertices[0].v.x));
+			int2 vertex_b(static_cast<int>(vertices[1].v.x),
+				static_cast<int>(vertices[1].v.x));
+			int2 vertex_c(static_cast<int>(vertices[2].v.x),
+				static_cast<int>(vertices[2].v.x));
+				
+			int2 min_vertex = min(vertex_a, min(vertex_b, vertex_c));
+			int2 max_vertex = max(vertex_a, max(vertex_b, vertex_c));
+
+			int2 min_border(0, 0);
+			int2 max_border(width-1, height-1);
+
+			int2 min_aabb = clamp(min_vertex, min_border, max_border);
+			int2 max_aabb = clamp(max_vertex, min_border, max_border);
+
+			for (int x = min_aabb.x; x <= max_aabb.x; x++)
+			{
+				for (int y = min_aabb.y; y <= max_aabb.y; y++)
+				{
+					int2 point(x, y);
+					int edge0 = edge_function(vertex_a, vertex_b, point);
+					int edge1 = edge_function(vertex_b, vertex_c, point);
+					int edge2 = edge_function(vertex_c, vertex_a, point);
+					if (edge0 >= 0 && edge1 >= 0 && edge2 >= 0)
+					{
+						float depth = 1.f;
+						auto result = pixel_shader(vertices[0], depth);
+						render_target->item(x, y) = RT::from_color(result);
+					}
+				}
+			}
 		}
-		// TODO Lab: 1.05 Add `Rasterization` and `Pixel shader` stages to `draw` method of `cg::renderer::rasterizer`
+
 		// TODO Lab: 1.06 Add `Depth test` stage to `draw` method of `cg::renderer::rasterizer`
 	}
 
@@ -127,8 +161,7 @@ namespace cg::renderer
 	inline int
 	rasterizer<VB, RT>::edge_function(int2 a, int2 b, int2 c)
 	{
-		// TODO Lab: 1.05 Implement `cg::renderer::rasterizer::edge_function` method
-		return 0;
+		return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x);
 	}
 
 	template<typename VB, typename RT>
