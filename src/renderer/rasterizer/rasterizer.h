@@ -124,11 +124,11 @@ namespace cg::renderer
 			}
 
 			int2 vertex_a(static_cast<int>(vertices[0].v.x),
-				static_cast<int>(vertices[0].v.x));
+				static_cast<int>(vertices[0].v.y));
 			int2 vertex_b(static_cast<int>(vertices[1].v.x),
-				static_cast<int>(vertices[1].v.x));
+				static_cast<int>(vertices[1].v.y));
 			int2 vertex_c(static_cast<int>(vertices[2].v.x),
-				static_cast<int>(vertices[2].v.x));
+				static_cast<int>(vertices[2].v.y));
 				
 			int2 min_vertex = min(vertex_a, min(vertex_b, vertex_c));
 			int2 max_vertex = max(vertex_a, max(vertex_b, vertex_c));
