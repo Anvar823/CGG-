@@ -12,7 +12,7 @@ void cg::renderer::rasterization_renderer::init()
 
 	rasterizer = std::make_shared<cg::renderer::rasterizer<cg::vertex, cg::unsigned_color>>();
 	rasterizer->set_viewport(settings->width, settings->height);
-	
+
 	render_target =
 		std::make_shared<cg::resource<cg::unsigned_color>>(
 			settings->width,
@@ -43,7 +43,7 @@ void cg::renderer::rasterization_renderer::render()
 		return cg::color::from_float3(data.ambient);
 	};
 
-	rasterizer->clear_render_target({48, 213, 200});
+	rasterizer->clear_render_target({100, 150, 250});
 
 	for (size_t shape_id = 0; shape_id < model->get_index_buffers().size();shape_id++)
 	{
