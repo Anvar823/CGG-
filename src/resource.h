@@ -98,8 +98,8 @@ namespace cg
 
 	struct unsigned_color
 	{
-		static constexpr uint8_t kMin = 100;
-		static constexpr uint8_t kMax = 200;
+		static constexpr uint8_t kMin = 0;
+		static constexpr uint8_t kMax = 255;
 
 		static unsigned_color from_color(const color& color)
 		{
