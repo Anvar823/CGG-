@@ -33,7 +33,6 @@ void cg::renderer::ray_tracing_renderer::init()
   shadow_raytracer->set_index_buffers(model->get_index_buffers());
 }
 
-
 void cg::renderer::ray_tracing_renderer::destroy() {}
 
 void cg::renderer::ray_tracing_renderer::update() {}
@@ -69,8 +68,8 @@ void cg::renderer::ray_tracing_renderer::render()
 			{
 				result_color += triangle.diffuse * light.color *
 					std::max(dot(normal, to_light.direction), 0.f);
-			}	
-		}
+			}
+		}			
 
 		payload.color = cg::color::from_float3(result_color);
 		return payload;
