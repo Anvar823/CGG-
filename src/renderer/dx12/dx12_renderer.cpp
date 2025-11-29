@@ -259,8 +259,7 @@ void cg::renderer::dx12_renderer::load_assets()
 	THROW_IF_FAILED(
 		constant_buffer->Map(0, &read_range, reinterpret_cast<void**>(&constant_buffer_data_begin))
 	);
-	// TODO Lab: 3.03 Create committed resources for vertex, index and constant buffers on upload heap
-	// TODO Lab: 3.03 Copy resource data to suitable resources
+	
 	// TODO Lab: 3.04 Create vertex buffer views
 	// TODO Lab: 3.04 Create index buffer views
 
