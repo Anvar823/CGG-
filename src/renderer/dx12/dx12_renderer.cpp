@@ -31,7 +31,13 @@ void cg::renderer::dx12_renderer::destroy()
 
 void cg::renderer::dx12_renderer::update()
 {
-	// TODO Lab: 3.08 Implement `update` method of `dx12_renderer`
+	auto now = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> duration = now - current_time;
+	frame_duration = duration.count();
+	current_time = now;
+
+	cb.mwpMatrix = camera->get_dxm_mvp_matrix();
+	memcpy(constant_buffer_data_begin, &cb, sizeof(cb));
 }
 
 void cg::renderer::dx12_renderer::render()
@@ -426,7 +432,7 @@ void cg::renderer::dx12_renderer::populate_command_list()
 	command_list->ClearRenderTargetView(rtv, clear_color, 0, nullptr);
 	command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	for (size_t s = 0; model->get_index_buffers().size(); s++)
+	for (size_t s = 0; s < model->get_index_buffers().size(); s++)
 	{
 		command_list->IASetVertexBuffers(0, 1, &vertex_buffer_views[s]);
 		command_list->IASetIndexBuffer(&index_buffer_views[s]);
